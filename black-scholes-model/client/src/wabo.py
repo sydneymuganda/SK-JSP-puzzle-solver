@@ -2,7 +2,7 @@ import requests
 import json
 
 # Define the server URL
-url = 'http://localhost:8090'
+url = 'http://localhost:8091'
 
 # Prepare the data you want to send as JSON
 data = {
@@ -13,6 +13,7 @@ data = {
     "timeToExpiration": 0.4,
     "isCallOption": True
 }
+
 
 # Send a POST request to the server
 try:

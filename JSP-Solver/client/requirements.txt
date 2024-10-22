@@ -1,0 +1,5 @@
+streamlit==1.39.0
+seaborn
+pandas
+matplotlib
+requests

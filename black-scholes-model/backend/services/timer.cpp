@@ -7,7 +7,7 @@
 double calculateTime(const std::string& expirationDate) {
     // Parse the expiration date string in the format "YYYY-MM-DD"
     Poco::DateTime expirationDateTime;
-    int utcOffset = 0; // Use an int for UTC offset
+    int utcOffset = 0; 
     
     // Parse the date
     Poco::DateTimeParser::parse(expirationDate, expirationDateTime, utcOffset);

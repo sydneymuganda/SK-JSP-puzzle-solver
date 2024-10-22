@@ -154,3 +154,4 @@ double BlackScholes::parallelMonteCarloSim(size_t numSimulations) {
 }
 
 BlackScholes::~BlackScholes(){}
+

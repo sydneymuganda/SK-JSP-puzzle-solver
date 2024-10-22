@@ -70,5 +70,6 @@
         "cfenv": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/home/xrbams/xr_code_quests/black-scholes-model/client/venv/lib/python3.10/site-packages/pyarrow/src/arrow/python"
 }

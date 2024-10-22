@@ -1,0 +1,24 @@
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
+
+/backend/build/
+backend/CMakeCache.txt
+backend/CMakeFiles/
+backend/*.cmake
+backend/*.o
+backend/*.so
+backend/*.a
+backend/*.out
+
+# Python virtual environment
+/client/venv/

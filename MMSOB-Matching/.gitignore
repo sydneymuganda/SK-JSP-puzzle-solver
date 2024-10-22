@@ -22,3 +22,4 @@ backend/*.out
 
 # Python virtual environment
 /client/venv/
+/client/src/__pycache__

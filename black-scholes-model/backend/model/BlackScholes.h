@@ -28,7 +28,8 @@ double timeToExpiration;
 double volatility;        
 double riskFreeRate;      
 double optionPrice;
-bool optionType; // if positive call else put.
+double callPurchasePrice;
+double putPurchasePrice;
 
 // Real-time market data: Store live prices fetched from APIs
 std::unique_ptr<std::vector<double>> marketPrices; 
@@ -50,15 +51,24 @@ public:
      // Constructor with smart pointers and option parameters
     BlackScholes(double strike, double time, double vol, double rate, bool type, 
                       const std::string& symbol, const std::string& api)
-        : strikePrice(strike), timeToExpiration(time), volatility(vol), riskFreeRate(rate), optionType(type),
+        : strikePrice(strike), timeToExpiration(time), volatility(vol), riskFreeRate(rate),
           stockSymbol(std::make_unique<std::string>(symbol)),
           apiKey(api),
           marketPrices(std::make_unique<std::vector<double>>()) {}
+    
+    BlackScholes(double strike, double time, double vol, double rate, double call, double put)
+        : strikePrice(strike), timeToExpiration(time), volatility(vol), riskFreeRate(rate), callPurchasePrice(call), putPurchasePrice(call) {}
 
     std::string fetchMarketData(const std::string& symbol);
     // Public method to calculate option price
     double calculateOptionPrice();
-    double calculateBSFormula(double underlyingPrice, bool type);
+    double getPutPrice(double currentPrice);
+    double getCallPrice(double currentPrice);
+    double calculateBSFormula(double underlyingPrice);
+    double roundToTwoDecimal(double value) { return std::round(value * 100.0) / 100.0; }
+    double getCallPnl(double currentPrice, double strikePrice, double purchasePrice);
+    double getPutPnl(double currentPrice, double strikePrice, double purchasePrice);
+
 
     void setStrikePrice(double strike) { strikePrice = strike; }
     double getStrikePrice() const { return strikePrice; }
@@ -75,8 +85,8 @@ public:
     void setRiskFreeRate(double rate) { riskFreeRate = rate; }
     double getRiskFreeRate() const { return riskFreeRate; }
 
-    bool getOptionType() const { return optionType; }   // to be used
-    void setOptionType(bool type) { optionType = type; } // to be used
+    // bool getOptionType() const { return optionType; }   // to be used
+    // void setOptionType(bool type) { optionType = type; } // to be used
 
     double getOptionPrice() const { return optionPrice; }
     void setOptionPrice(double price) { optionPrice = price; }

@@ -10,7 +10,7 @@ double BlackScholes::normalCDF(double value){
     return 0.5 * std::erfc(-value / std::sqrt(2));
 }
 
-double BlackScholes::calculateBSFormula(double currentPrice, bool isCallOption) {
+double BlackScholes::calculateBSFormula(double currentPrice) {
     // Variables required for Black-Scholes formula
     double d1 = (log(currentPrice / strikePrice) + (riskFreeRate + (volatility * volatility) / 2) * timeToExpiration) / (volatility * sqrt(timeToExpiration));
     double d2 = d1 - volatility * sqrt(timeToExpiration);
@@ -18,15 +18,39 @@ double BlackScholes::calculateBSFormula(double currentPrice, bool isCallOption) 
     // CDF of normal distribution
     double N_d1 = normalCDF(d1);
     double N_d2 = normalCDF(d2);
+}
 
-    // Calculate call price
-    if (isCallOption) {
-        return currentPrice * N_d1 - strikePrice * exp(-riskFreeRate * timeToExpiration) * N_d2;
-    }
-    // Calculate put price
-    else {
-        return strikePrice * exp(-riskFreeRate * timeToExpiration) * (1 - N_d2) - currentPrice * (1 - N_d1);
-    }
+
+double BlackScholes::getPutPrice(double currentPrice) {
+    double d1 = (log(currentPrice / strikePrice) + (riskFreeRate + (volatility * volatility) / 2) * timeToExpiration) / (volatility * sqrt(timeToExpiration));
+    double d2 = d1 - volatility * sqrt(timeToExpiration);
+
+    double N_d1 = normalCDF(d1);
+    double N_d2 = normalCDF(d2);
+
+    double putPrice = strikePrice * exp(-riskFreeRate * timeToExpiration) * (1 - N_d2) - currentPrice * (1 - N_d1);
+    return roundToTwoDecimal(putPrice);
+}
+
+double BlackScholes::getCallPrice(double currentPrice){
+    double d1 = (log(currentPrice / strikePrice) + (riskFreeRate + (volatility * volatility) / 2) * timeToExpiration) / (volatility * sqrt(timeToExpiration));
+    double d2 = d1 - volatility * sqrt(timeToExpiration);
+
+    double N_d1 = normalCDF(d1);
+    double N_d2 = normalCDF(d2);
+
+    double callPrice = currentPrice * N_d1 - strikePrice * exp(-riskFreeRate * timeToExpiration) * N_d2;
+    return roundToTwoDecimal(callPrice);
+}
+
+double getCallPnl(double currentPrice, double strikePrice, double purchasePrice) {
+    double intrinsicValue = std::max(0.0, currentPrice - strikePrice);
+    return intrinsicValue - purchasePrice;
+}
+
+double getPutPnl(double currentPrice, double strikePrice, double purchasePrice) {
+    double intrinsicValue = std::max(0.0, strikePrice - currentPrice);
+    return intrinsicValue - purchasePrice;
 }
 
 void BlackScholes::updateWithRealTimeData() {
@@ -73,7 +97,7 @@ void BlackScholes::updateWithRealTimeData() {
 
                     // Calculate and output the option price
                     std::cout << "Current mark price for " << symbol << ": " << currentPrice << std::endl;
-                    std::cout << (optionType ? "Call" : "Put") << " option price: " << calculateBSFormula(currentPrice, optionType) << std::endl;
+                    std::cout << (optionType ? "Call" : "Put") << " option price: " << calculateBSFormula(currentPrice) << std::endl;
                 } else {
                     std::cerr << "Data array is empty or not found." << std::endl;
                 }
@@ -126,7 +150,7 @@ std::string BlackScholes::fetchMarketData(const std::string& symbol) {
 // input data from the streamlit app into this function
 double BlackScholes::calculateOptionPrice() {
     double underlyingPrice = 100.0;
-    optionPrice = calculateBSFormula(underlyingPrice, optionType); 
+    optionPrice = calculateBSFormula(underlyingPrice); 
     return optionPrice;
 }
 
@@ -136,7 +160,7 @@ double BlackScholes::parallelMonteCarloSim(size_t numSimulations) {
     for (size_t i = 0; i < numSimulations; ++i)
     {
         futures.push_back(std::async(std::launch::async, [this](){
-            double price = calculateBSFormula(100.0, optionType);
+            double price = calculateBSFormula(100.0);
             return price;
         }));
     }

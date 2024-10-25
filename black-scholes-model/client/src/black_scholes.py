@@ -19,9 +19,13 @@ def show():
     T = st.sidebar.number_input("Time to Expiration (T) in years", min_value=0.0, value=1.0, step=0.01, format="%.2f")
     r = st.sidebar.number_input("Risk-Free Rate (r)", min_value=0.0, value=0.05, step=0.01, format="%.2f")
     sigma = st.sidebar.number_input("Volatility (σ)", min_value=0.0, value=0.2, step=0.01, format="%.2f")
+    
+     # Separate section for Heatmap Parameters
+    st.sidebar.subheader("Heatmap Parameters")
     put_purchase_price = st.sidebar.number_input("Put Purchase Price", min_value=0.0, value=50.0, step=1.0, format="%.2f")
     call_purchase_price = st.sidebar.number_input("Call Purchase Price", min_value=0.0, value=50.0, step=1.0, format="%.2f")
-
+    stock_range = st.sidebar.slider( "Stock Range for Heatmap", min_value=10, max_value=150, value=(50, 150), step=10)
+    volatility_range = st.sidebar.slider("Volatility Range for Heatmap", 0.1, 1.0, (0.1, 0.5), 0.01)
     # Prepare data for sending to backend
     data = {
         "currentPrice": S,
@@ -100,11 +104,8 @@ def show():
 
     # Simulating PnL data for heatmaps (you can replace this with actual backend response)
     # Parameters
-    strike_price = 100
-    call_purchase_price = 10
-    put_purchase_price = 10
-    volatilities = np.linspace(0.1, 0.5, 10)
-    stock_prices = np.linspace(50, 150, 10)
+    volatilities = np.linspace(volatility_range[0], volatility_range[1], 10)
+    stock_prices = np.linspace(stock_range[0], stock_range[1], 10) 
 
     # Initialize PnL matrices
     pnl_data_call = np.zeros((len(stock_prices), len(volatilities)))
@@ -114,27 +115,31 @@ def show():
     for i, stock_price in enumerate(stock_prices):
         for j, volatility in enumerate(volatilities):
             # Simulating current price and using fixed strike price and purchase prices
-            pnl_data_call[i, j] = getCallPnl(stock_price, strike_price, call_purchase_price)
-            pnl_data_put[i, j] = getPutPnl(stock_price, strike_price, put_purchase_price)
+            pnl_data_call[i, j] = getCallPnl(stock_price, K, call_purchase_price)
+            pnl_data_put[i, j] = getPutPnl(stock_price, K, put_purchase_price)
 
     with col3:
         # Heatmap for Call PnL
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(pnl_data_call, cmap='RdYlGn', xticklabels=[f"{vol:.2f}" for vol in volatilities],
-                    yticklabels=[f"{price:.2f}" for price in stock_prices])
+        plt.figure(figsize=(10, 8))  # Adjusting size to ensure squares
+        sns.heatmap(pnl_data_call, cmap='RdYlGn', annot=True, fmt=".1f", square=True,
+                    yticklabels=[f"{vol:.2f}" for vol in volatilities],
+                    xticklabels=[f"{price:.2f}" for price in stock_prices], 
+                    linecolor='grey', linewidths=0.5)
         plt.title("Call Option PnL Heatmap")
-        plt.xlabel("Volatility (σ)")
-        plt.ylabel("Stock Price (S)")
+        plt.ylabel("Volatility (σ)")
+        plt.xlabel("Stock Price (S)")
         st.pyplot(plt)
 
     with col4:
         # Heatmap for Put PnL
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(pnl_data_put, cmap='RdYlGn', xticklabels=[f"{vol:.2f}" for vol in volatilities],
-                    yticklabels=[f"{price:.2f}" for price in stock_prices])
+        plt.figure(figsize=(10, 8))  # Adjusting size to ensure squares
+        sns.heatmap(pnl_data_put, cmap='RdYlGn', annot=True, fmt=".1f", square=True,
+                    yticklabels=[f"{vol:.2f}" for vol in volatilities],
+                    xticklabels=[f"{price:.2f}" for price in stock_prices], 
+                    linecolor='grey', linewidths=0.2)
         plt.title("Put Option PnL Heatmap")
-        plt.xlabel("Volatility (σ)")
-        plt.ylabel("Stock Price (S)")
+        plt.ylabel("Volatility (σ)")
+        plt.xlabel("Stock Price (S)")
         st.pyplot(plt)
 
 def getOptionPrice(data, option_type):
@@ -154,4 +159,17 @@ def getOptionPrice(data, option_type):
     except requests.exceptions.RequestException as e:
         st.error(f"An error occurred: {e}")
         return "N/A", "N/A"
+    
+def getPnl(Stuff):
+    if(Stuff):
+        return True
 
+
+def getCallPnl(stock_price, strike_price, purchase_price):
+    intrinsicValue = max(0.0, stock_price - strike_price)
+    return intrinsicValue - purchase_price
+
+
+def getPutPnl(stock_price, strike_price, purchase_price):
+    intrinsicValue = max(0.0, stock_price - strike_price)
+    return intrinsicValue - purchase_price

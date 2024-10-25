@@ -43,12 +43,12 @@ double BlackScholes::getCallPrice(double currentPrice){
     return roundToTwoDecimal(callPrice);
 }
 
-double getCallPnl(double currentPrice, double strikePrice, double purchasePrice) {
+double BlackScholes::getCallPnl(double currentPrice, double strikePrice, double purchasePrice) {
     double intrinsicValue = std::max(0.0, currentPrice - strikePrice);
     return intrinsicValue - purchasePrice;
 }
 
-double getPutPnl(double currentPrice, double strikePrice, double purchasePrice) {
+double BlackScholes::getPutPnl(double currentPrice, double strikePrice, double purchasePrice) {
     double intrinsicValue = std::max(0.0, strikePrice - currentPrice);
     return intrinsicValue - purchasePrice;
 }

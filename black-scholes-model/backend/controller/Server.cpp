@@ -49,6 +49,7 @@ public:
         }
 
         auto jsonObject = result.extract<Poco::JSON::Object::Ptr>();
+       
 
         // Extract data from the JSON object
         double currentPrice = jsonObject->getValue<double>("currentPrice");
@@ -56,27 +57,33 @@ public:
         double riskFreeRate = jsonObject->getValue<double>("riskFreeRate");
         double volatility = jsonObject->getValue<double>("volatility");
         double timeToExpiration = jsonObject->getValue<double>("timeToExpiration");
-        bool isCallOption = jsonObject->getValue<bool>("isCallOption");
+        double callPurchasePrice = jsonObject->getValue<double>("callPurchasePrice");
+        double putPurchasePrice = jsonObject->getValue<double>("putPurchasePrice");
+        
+        BlackScholes bs(strikePrice, timeToExpiration, volatility, riskFreeRate, callPurchasePrice, putPurchasePrice);
 
         // Calculate the option price
-        double optionPrice = calculateOptionPrice(currentPrice, strikePrice, riskFreeRate, volatility, timeToExpiration, isCallOption);
+        double put_price = bs.getPutPrice(currentPrice);
+        double call_price = bs.getCallPrice(currentPrice);
+        double put_pnl = bs.getPutPnl(currentPrice, strikePrice, putPurchasePrice);
+        double call_pnl= bs.getCallPnl(currentPrice, strikePrice, callPurchasePrice);
 
         // Prepare the JSON response
         Poco::JSON::Object::Ptr jsonResponse = new Poco::JSON::Object;
-        jsonResponse->set("optionPrice", optionPrice);
+        jsonResponse->set("put_price", put_price);
+        jsonResponse->set("call_price", call_price);
+        jsonResponse->set("put_pnl", put_pnl);
+        jsonResponse->set("call_pnl", call_pnl);
 
         // Send the JSON response
         response.setContentType("application/json");
         std::ostream& ostr = response.send();
         Poco::JSON::Stringifier::stringify(*jsonResponse, ostr);
 
-        cout << "Response sent with option price: " << optionPrice << endl;
+        cout << "Response sent !!! "<< endl;
     }
 
-    double calculateOptionPrice(double currentPrice, double strikePrice, double riskFreeRate, double volatility, double timeToExpiration, bool isCallOption) {
-        // Replace this with your actual Black-Scholes calculation logic
-        return (isCallOption) ? (currentPrice - strikePrice) : (strikePrice - currentPrice);
-    }
+ 
 };
 
 // RequestHandlerFactory to produce RequestHandlers
@@ -96,11 +103,11 @@ public:
         params->setMaxThreads(16); // Set the maximum number of threads to handle requests
         params->setMaxQueued(100); // Set maximum queued connections
 
-        ServerSocket svs(8091); // Listening on port 8090
+        ServerSocket svs(8092); // Listening on port 8090
         HTTPServer srv(new RequestHandlerFactory, svs, params);
 
         srv.start();
-        cout << "Server started on port 8091...." << endl;
+        cout << "Server started on port 8092...." << endl;
 
         waitForTerminationRequest();  // Wait for CTRL+C or kill command
 

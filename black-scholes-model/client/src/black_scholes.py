@@ -24,7 +24,7 @@ def show():
     st.sidebar.subheader("Heatmap Parameters")
     put_purchase_price = st.sidebar.number_input("Put Purchase Price", min_value=0.0, value=50.0, step=1.0, format="%.2f")
     call_purchase_price = st.sidebar.number_input("Call Purchase Price", min_value=0.0, value=50.0, step=1.0, format="%.2f")
-    stock_range = st.sidebar.slider( "Stock Range for Heatmap", min_value=10, max_value=150, value=(50, 150), step=10)
+    stock_range = st.sidebar.slider( "Stock Range for Heatmap", min_value=10, max_value=250, value=(50, 150), step=1)
     volatility_range = st.sidebar.slider("Volatility Range for Heatmap", 0.1, 1.0, (0.1, 0.5), 0.01)
     # Prepare data for sending to backend
     data = {
@@ -143,7 +143,7 @@ def show():
         st.pyplot(plt)
 
 def getOptionPrice(data, option_type):
-    url = 'http://localhost:8092'  # Adjust this to your backend URL
+    url = 'http://localhost:8092/main'  # Adjust this to your backend URL
     try:
         response = requests.post(url, json=data)
         response.raise_for_status()
@@ -160,7 +160,7 @@ def getOptionPrice(data, option_type):
         st.error(f"An error occurred: {e}")
         return "N/A", "N/A"
     
-def getPnl(Stuff):
+def getHeatmapSim(Stuff):
     if(Stuff):
         return True
 
